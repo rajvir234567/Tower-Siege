@@ -1,16 +1,28 @@
 const Engine = Matter.Engine;
 const World= Matter.World;
 const Bodies = Matter.Bodies;
+const Constraint = Matter.Constraint;
 
 var engine, world;
 var platform;
-var slingshot;
+var ball;
+var gameState = "onsling";
 
 function setup(){
     createCanvas(1200,600)
 
     engine = Engine.create();
     world = engine.world
+
+    var options = {
+        'restitution':0.8,
+        'friction':1.0,
+        'density':1.0,
+        isStatic:false
+    }
+    ball = Bodies.circle(50, 200, 20, options);
+    World.add(world,ball);
+    slingshot = new SlingShot(ball,{x: 300,y:200});
 
     ground = new Ground(600,565,1200,80);
     
@@ -53,9 +65,13 @@ function setup(){
 
 function draw(){
     background(0);
-
+    Engine.update(engine);
+    ellipseMode(RADIUS);
+    console.log(ball.body);
+    ellipse(ball.position.x,ball.position.y,20,20);
+    
     ground.display();
-
+    
     fill(random(0,255),random(0,255),random(0,255));
     block1.display();
     block2.display();
@@ -85,4 +101,24 @@ function draw(){
     block26.display();
     block27.display();
     block28.display();
+    slingshot.display();
+}
+function mouseDragged(){
+    if (gameState!=="launched"){
+        Matter.Body.setPosition(ball, {x: mouseX , y: mouseY});
+    }
+}
+
+
+function mouseReleased(){
+    slingshot.fly();
+    gameState = "launched";
+}
+
+function keyPressed(){
+    if(keyCode === 32 && ball.speed < 1){
+       //ball.trajectory = [];
+       //Matter.Body.setPosition(ball,{x:200, y:50});
+       //slingshot.attach(ball);
+    }
 }
